@@ -12,8 +12,10 @@ app.use(express.json());
 connectDatabase();
 
 const userRoute = require("./routes/users.route");
+const authRoute = require("./routes/auth.route");
 
 app.use("/users", userRoute);
+app.use("/auth", authRoute);
 
 app.get("/", (req, res) => {
     res.send({ message: "Hello, world!" });
