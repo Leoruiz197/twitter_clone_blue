@@ -17,15 +17,15 @@ module.exports = (req, res, next) => {
 
   const [scheme, token] = parts;
 
-  if (!/^Bearer^/i.test(scheme)) {
+  if (!/^Bearer$/i.test(scheme)) {
     return res.status(401).send({ message: "Token malformatado!" });
   }
 
   jwt.verify(token, process.env.SECRET, async (err, decoded) => {
-    const user = findByIdUserService(decoded.id);
+    const user = await findByIdUserService(decoded.id);
 
     if (err || !user || !user.id) {
-      return res.status(401).send({ message: "Token inválido!" });
+      return res.status(401).send({ message: "Token inválido2!" });
     }
 
     req.userId = user.id;

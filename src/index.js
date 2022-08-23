@@ -13,9 +13,11 @@ connectDatabase();
 
 const userRoute = require("./routes/users.route");
 const authRoute = require("./routes/auth.route");
+const tweetsRoute = require("./routes/tweets.route");
 
 app.use("/users", userRoute);
 app.use("/auth", authRoute);
+app.use("/tweets", tweetsRoute);
 
 app.get("/", (req, res) => {
     res.send({ message: "Hello, world!" });
