@@ -2,7 +2,8 @@ const Tweet = require("../models/Tweet");
 
 const createTweetService = (message, userId) => Tweet.create({message, user:userId});
 
-const findAllTweetsService = () => Tweet.find().sort({ _id: -1 }).populate("user");
+const findAllTweetsService = (offset, limit) => 
+Tweet.find().sort({ _id: -1 }).skip(offset).limit(limit).populate("user");
 
 const searchTweetService = (message) =>
   Tweet.find({
@@ -11,4 +12,58 @@ const searchTweetService = (message) =>
     .sort({ _id: -1 })
     .populate("user")
 
-module.exports = { createTweetService, findAllTweetsService, searchTweetService };
+const likesService = (id, userId) => Tweet.findOneAndUpdate(
+  {
+    _id: id,
+    "likes.userId": { $nin: [userId]}
+  },
+  {
+    $push: {
+      likes: { userId, created: new Date() }
+    }
+  },
+  {
+    rawResult: true,
+  },
+);
+
+const retweetsService = (id, userId) => Tweet.findOneAndUpdate(
+  {
+    _id: id,
+    "retweets.userId": { $nin: [userId] },
+  },
+  {
+    $push: {
+      retweets: { userId, created: new Date() },
+    },
+  },
+  {
+    rawResult: true,
+  }
+);
+
+const commentsService = (id, userId, comment) => Tweet.findOneAndUpdate(
+  {
+    _id: id,
+  },
+  {
+    $push: {
+      comments: { userId, comment: comment, created: new Date() },
+    },
+  },
+  {
+    rawResult: true,
+  }
+);
+
+const countTweets = () => Tweet.countDocuments();
+
+module.exports = { 
+  createTweetService, 
+  findAllTweetsService, 
+  searchTweetService, 
+  likesService,
+  retweetsService,
+  commentsService,
+  countTweets 
+};
