@@ -125,6 +125,22 @@ const likeTweetController = async (req, res) => {
     });
 };
 
+const dislikeTweetController = async (req, res) => {
+    const { id } = req.params; 
+    const userId = req.userId;
+
+    const tweetDisliked = await tweetService.dislikesService(id, userId);
+
+    console.log(tweetDisliked);
+    if (tweetDisliked.lastErrorObject.n === 0) {
+        return res.status(400).send({ message: "Você já deu dislike neste tweet!"})
+    };
+
+    return res.send({
+        message: "Disike realizado com sucesso!"
+    });
+};
+
 const retweetTweetController = async (req, res) => {
   const { id } = req.params;
 
@@ -138,6 +154,22 @@ const retweetTweetController = async (req, res) => {
 
   return res.send({
     message: "Retweet realizado com sucesso!",
+  });
+};
+
+const undoretweetTweetController = async (req, res) => {
+  const { id } = req.params;
+
+  const userId = req.userId;
+
+  const undotweetRetweeted = await tweetService.undoretweetsService(id, userId);
+
+  if (undotweetRetweeted.lastErrorObject.n === 0) {
+      return res.status(400).send({ message: "Você já deu undoretweet neste tweet!" });
+  }
+
+  return res.send({
+      message: "Retweet realizado com sucesso!",
   });
 };
 
@@ -155,11 +187,27 @@ const commentTweetController = async (req, res) => {
   });
 };
 
+const uncommentTweetController = async (req, res) => {
+  const { id } = req.params;
+
+  const userId = req.userId;
+  const commentid = req.query.commentid;
+  
+  await tweetService.uncommentsService(id, userId, commentid);
+
+  return res.send({
+    message: "Comentário apagado com sucesso!",
+  });
+};
+
 module.exports = {
   createTweetController, 
   findAllTweetsController, 
   searchTweetController, 
   likeTweetController,
+  dislikeTweetController,
   retweetTweetController,
-  commentTweetController
+  undoretweetTweetController,
+  commentTweetController,
+  uncommentTweetController
 }

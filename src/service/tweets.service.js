@@ -27,6 +27,22 @@ const likesService = (id, userId) => Tweet.findOneAndUpdate(
   },
 );
 
+const dislikesService = (id, userId) => Tweet.findOneAndUpdate(
+  {
+    _id: id,
+  },
+  {
+    $pull: {
+      likes:{
+        "userId":userId
+      },
+    }, 
+  },
+  {
+    rawResult: true,
+  },
+);
+
 const retweetsService = (id, userId) => Tweet.findOneAndUpdate(
   {
     _id: id,
@@ -40,6 +56,22 @@ const retweetsService = (id, userId) => Tweet.findOneAndUpdate(
   {
     rawResult: true,
   }
+);
+
+const undoretweetsService = (id, userId) => Tweet.findOneAndUpdate(
+  {
+    _id: id,
+  },
+  {
+    $pull: {
+      retweets:{
+        "userId":userId
+      },
+    }, 
+  },
+  {
+    rawResult: true,
+  },
 );
 
 const commentsService = (id, userId, comment) => Tweet.findOneAndUpdate(
@@ -56,6 +88,20 @@ const commentsService = (id, userId, comment) => Tweet.findOneAndUpdate(
   }
 );
 
+const uncommentsService = (id, userId) => Tweet.findOneAndUpdate(
+  {
+    _id: id,
+  },
+  {
+    $pull: {
+      comments: { "commentid": commentid},
+    },
+  },
+  {
+    rawResult: true,
+  }
+);
+
 const countTweets = () => Tweet.countDocuments();
 
 module.exports = { 
@@ -63,7 +109,10 @@ module.exports = {
   findAllTweetsService, 
   searchTweetService, 
   likesService,
+  dislikesService,
   retweetsService,
+  undoretweetsService,
   commentsService,
+  uncommentsService,
   countTweets 
 };
