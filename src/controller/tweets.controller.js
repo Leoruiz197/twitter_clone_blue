@@ -1,14 +1,13 @@
 const tweetService = require("../service/tweets.service");
+const { v4: uuidv4 } = require('uuid');
 
 const createTweetController = async (req, res) => {
     try {
-        const {message} = req.body;
-
-        if(!message){
+        if(!req.body.message){
             res.status(400).send({message:"O Envie todos os dados necessários para a criação do tweet"});
         }
 
-        const { id } = await tweetService.createTweetService(message, req.userId);
+        const { id } = await tweetService.createTweetService(req.body.message, req.userId);
 
         return res.status(201).send({
             message:"Tweet criado com sucesso!",
@@ -26,14 +25,10 @@ const findAllTweetsController = async (req, res) => {
 
         offset = Number(offset);
         limit = Number(limit);
-    
-        if (!offset) {
-          offset = 0;
-        }
-    
-        if (!limit) {
-          limit = 6;
-        }
+
+        !offset ? offset = 0 : null;
+
+        !limit ? limit = 6 : null;
 
         const tweets = await tweetService.findAllTweetsService(offset, limit);
 
@@ -51,8 +46,6 @@ const findAllTweetsController = async (req, res) => {
             ? `${currentUrl}?limit=${limit}&offset=${previous}`
             : null;
 
-
-        console.log(tweets);
         if (tweets.length === 0) {
         return res.status(400).send({ message: "Não existem tweets!" });
         }
@@ -82,9 +75,7 @@ const findAllTweetsController = async (req, res) => {
 
 const searchTweetController = async (req, res) => {
     try {
-        const { message } = req.query;
-    
-        const tweets = await tweetService.searchTweetService(message);
+        const tweets = await tweetService.searchTweetService(req.query.message);
     
         if (tweets.length === 0) {
         return res
@@ -111,93 +102,97 @@ const searchTweetController = async (req, res) => {
 };
 
 const likeTweetController = async (req, res) => {
-    const { id } = req.params; 
-    const userId = req.userId;
+    try{
+        const tweetLiked = await tweetService.likesService(req.params.id, req.userId);
 
-    const tweetLiked = await tweetService.likesService(id, userId);
+        if (tweetLiked.lastErrorObject.n === 0) {
+            return res.status(400).send({ message: "Você já deu like neste tweet!"})
+        };
 
-    if (tweetLiked.lastErrorObject.n === 0) {
-        return res.status(400).send({ message: "Você já deu like neste tweet!"})
-    };
-
-    return res.send({
-        message: "Like realizado com sucesso!"
-    });
+        return res.send({
+            message: "Like realizado com sucesso!"
+        });
+    } catch (err) {
+        res.status(500).send({ message: "Erro inesperado, tente novamente mais tarde"});
+        console.log(err.message);
+    }
 };
 
 const dislikeTweetController = async (req, res) => {
-    const { id } = req.params; 
-    const userId = req.userId;
+    try{
+        const tweetDisliked = await tweetService.dislikesService(req.params.id, req.userId);
 
-    const tweetDisliked = await tweetService.dislikesService(id, userId);
+        if (tweetDisliked.lastErrorObject.n === 0) {
+            return res.status(400).send({ message: "Você já deu dislike neste tweet!"})
+        };
 
-    console.log(tweetDisliked);
-    if (tweetDisliked.lastErrorObject.n === 0) {
-        return res.status(400).send({ message: "Você já deu dislike neste tweet!"})
-    };
-
-    return res.send({
-        message: "Disike realizado com sucesso!"
-    });
+        return res.send({
+            message: "Disike realizado com sucesso!"
+        });
+    } catch (err) {
+        res.status(500).send({ message: "Erro inesperado, tente novamente mais tarde"});
+        console.log(err.message);
+    }
 };
 
 const retweetTweetController = async (req, res) => {
-  const { id } = req.params;
+    try{
+        const tweetRetweeted = await tweetService.retweetsService(req.params.id, req.userId);
 
-  const userId = req.userId;
+        if (tweetRetweeted.lastErrorObject.n === 0) {
+            return res.status(400).send({ message: "Você já deu retweet neste tweet!" });
+        }
 
-  const tweetRetweeted = await tweetService.retweetsService(id, userId);
-
-  if (tweetRetweeted.lastErrorObject.n === 0) {
-    return res.status(400).send({ message: "Você já deu retweet neste tweet!" });
-  }
-
-  return res.send({
-    message: "Retweet realizado com sucesso!",
-  });
+        return res.send({
+            message: "Retweet realizado com sucesso!",
+        });
+    } catch (err) {
+        res.status(500).send({ message: "Erro inesperado, tente novamente mais tarde"});
+        console.log(err.message);
+    }
 };
 
 const undoretweetTweetController = async (req, res) => {
-  const { id } = req.params;
+    try{
+        const undotweetRetweeted = await tweetService.undoretweetsService(req.params.id, req.userId);
 
-  const userId = req.userId;
+        if (undotweetRetweeted.lastErrorObject.n === 0) {
+            return res.status(400).send({ message: "Você já deu undoretweet neste tweet!" });
+        }
 
-  const undotweetRetweeted = await tweetService.undoretweetsService(id, userId);
-
-  if (undotweetRetweeted.lastErrorObject.n === 0) {
-      return res.status(400).send({ message: "Você já deu undoretweet neste tweet!" });
-  }
-
-  return res.send({
-      message: "Retweet realizado com sucesso!",
-  });
+        return res.send({
+            message: "Retweet realizado com sucesso!",
+        });
+    } catch (err) {
+        res.status(500).send({ message: "Erro inesperado, tente novamente mais tarde"});
+        console.log(err.message);
+    }
 };
 
-const commentTweetController = async (req, res) => {
-  const { id } = req.params;
+const commentTweetController = async (req, res) => {  
+    try{
+        await tweetService.commentsService(req.params.id, req.userId, uuidv4(), req.body.comment);
 
-  const userId = req.userId;
-
-  const comment = req.body.comment;
-  
-  await tweetService.commentsService(id, userId, comment);
-
-  return res.send({
-    message: "Comentário realizado com sucesso!",
-  });
+        return res.send({
+            message: "Comentário realizado com sucesso!",
+        });
+    } catch (err) {
+        res.status(500).send({ message: "Erro inesperado, tente novamente mais tarde"});
+        console.log(err.message);
+    }
 };
 
 const uncommentTweetController = async (req, res) => {
-  const { id } = req.params;
+    try{
+        await tweetService.uncommentsService(req.params.id, req.query.comment_id);
 
-  const userId = req.userId;
-  const commentid = req.query.commentid;
-  
-  await tweetService.uncommentsService(id, userId, commentid);
-
-  return res.send({
-    message: "Comentário apagado com sucesso!",
-  });
+        return res.send({
+            message: "Comentário apagado com sucesso!",
+        });
+    } catch (err) {
+        res.status(500).send({ message: "Erro inesperado, tente novamente mais tarde"});
+        console.log(err.message);
+    }
 };
 
 module.exports = {

@@ -20,7 +20,7 @@ app.use("/auth", authRoute);
 app.use("/tweets", tweetsRoute);
 
 app.get("/", (req, res) => {
-    res.send({ message: "Hello, world!" });
+  res.send({ message: "Hello, world!" });
 });
 
 app.listen(port, () => {

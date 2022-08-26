@@ -74,13 +74,13 @@ const undoretweetsService = (id, userId) => Tweet.findOneAndUpdate(
   },
 );
 
-const commentsService = (id, userId, comment) => Tweet.findOneAndUpdate(
+const commentsService = (id, userId, comment_id, comment) => Tweet.findOneAndUpdate(
   {
     _id: id,
   },
   {
     $push: {
-      comments: { userId, comment: comment, created: new Date() },
+      comments: { userId, comment_id, comment, created: new Date() },
     },
   },
   {
@@ -88,13 +88,13 @@ const commentsService = (id, userId, comment) => Tweet.findOneAndUpdate(
   }
 );
 
-const uncommentsService = (id, userId) => Tweet.findOneAndUpdate(
+const uncommentsService = (id, comment_id) => Tweet.findOneAndUpdate(
   {
     _id: id,
   },
   {
     $pull: {
-      comments: { "commentid": commentid},
+      comments: { "comment_id": comment_id},
     },
   },
   {
