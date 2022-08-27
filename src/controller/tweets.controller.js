@@ -7,7 +7,7 @@ const createTweetController = async (req, res) => {
             res.status(400).send({message:"O Envie todos os dados necessários para a criação do tweet"});
         }
 
-        const { id } = await tweetService.createTweetService(req.body.message, req.userId);
+        const { id, message } = await tweetService.createTweetService(req.body.message, req.userId);
 
         return res.status(201).send({
             message:"Tweet criado com sucesso!",
